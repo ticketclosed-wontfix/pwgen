@@ -330,10 +330,16 @@ function genPP(){
       const estPerWord=((wmin+wmax)/2)+((nl+1)*(wc>1?1:0))+1;
       const estTotal=estPerWord*wc;
       if(estTotal<minLen){
-        const deficit=minLen-estTotal;
-        const extra=Math.ceil(deficit/wc);
-        wmax=Math.min(20,wmax+extra);
-        if(wmin>wmax)wmin=wmax-1;
+        wmin=Math.max(wmin,Math.ceil((minLen/wc)-(nl+1)));
+        wmax=Math.min(20,Math.max(wmax,wmin+3));
+      }
+    }
+    // Auto-shrink to fit max length
+    if(maxLen>0){
+      const estPerWordMax=wmax+((nl+1)*(wc>1?1:0))+1;
+      if(estPerWordMax*wc>maxLen){
+        wmax=Math.max(3,Math.floor((maxLen/wc)-(nl+1)));
+        if(wmin>wmax)wmin=Math.max(2,wmax-1);
       }
     }
     let p=mkPP(wc,wmin,wmax,nl,sp),tries=0;
