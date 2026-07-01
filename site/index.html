@@ -321,12 +321,24 @@ function mkPP(wc,wmin,wmax,nl,sp){
 function ent(pp){const h=/[a-z]/.test(pp),u=/[A-Z]/.test(pp),d=/[0-9]/.test(pp),s=/[^a-zA-Z0-9]/.test(pp);let p=0;if(h)p+=26;if(u)p+=26;if(d)p+=10;if(s)p+=18;return Math.round(pp.length*Math.log2(p||26))}
 
 function genPP(){
-  const wc=+document.getElementById('s-wc').value,wmin=+document.getElementById('s-wmin').value,wmax=+document.getElementById('s-wmax').value,nl=+document.getElementById('s-nl').value,sp=+document.getElementById('s-sp').value;
+  const wc0=+document.getElementById('s-wc').value,wmin0=+document.getElementById('s-wmin').value,wmax0=+document.getElementById('s-wmax').value,nl=+document.getElementById('s-nl').value,sp=+document.getElementById('s-sp').value;
   const minLen=+document.getElementById('s-minlen').value,maxLen=+document.getElementById('s-maxlen').value;
   const r=[];for(let i=0;i<5;i++){
+    let wc=wc0,wmin=wmin0,wmax=wmax0;
+    // Auto-expand settings to meet min length
+    if(minLen>0){
+      const estPerWord=((wmin+wmax)/2)+((nl+1)*(wc>1?1:0))+1;
+      const estTotal=estPerWord*wc;
+      if(estTotal<minLen){
+        const deficit=minLen-estTotal;
+        const extra=Math.ceil(deficit/wc);
+        wmax=Math.min(20,wmax+extra);
+        if(wmin>wmax)wmin=wmax-1;
+      }
+    }
     let p=mkPP(wc,wmin,wmax,nl,sp),tries=0;
     if(minLen>0||maxLen>0){
-      while(tries<300){
+      while(tries<500){
         if((minLen===0||p.length>=minLen)&&(maxLen===0||p.length<=maxLen))break;
         p=mkPP(wc,wmin,wmax,nl,sp);tries++;
       }
